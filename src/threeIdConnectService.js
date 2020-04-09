@@ -16,13 +16,13 @@ const serializedKey = (address) => `serialized3id_${address}`
 // TODO could still refactor to make parts less visual/flow implementation specific
 
 /**
- *  IdentityWalletService runs an identity wallet instance and rpc server with
+ *  ThreeIdConnectService runs an identity wallet instance and rpc server with
  *  bindings to receive and relay rpc messages to identity wallet
  */
-class IdentityWalletService {
+class ThreeIdConnectService {
 
   /**
-    * Create IdentityWalletService
+    * Create ThreeIdConnectService
     */
   constructor () {
     this._registerDisplayListeners()
@@ -198,4 +198,4 @@ class IdentityWalletService {
   }
 }
 
-export default IdentityWalletService
+export default ThreeIdConnectService
