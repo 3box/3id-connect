@@ -1,7 +1,13 @@
 import { expose, caller } from 'postmsg-rpc'
 import { fakeIpfs } from 'identity-wallet/lib/utils'
-const IdentityWallet = require('identity-wallet')
+const sha256 = require('js-sha256').sha256
+
+// const IdentityWallet = require('identity-wallet')
+const IdentityWallet = require('./../../identity-wallet-js/lib/identity-wallet')
+
+
 const ThreeId = require('3box/lib/3id/index')
+const API = require('3box/lib/api')
 import { createLink } from '3id-blockchain-utils'
 const Url = require('url-parse')
 const store = require('store')
@@ -11,6 +17,39 @@ const serializedKey = (address) => `serialized3id_${address}`
 
 // TODO ui/iframe needs number of hooks, events may be a better interface
 // TODO could still refactor to make parts less visual/flow implementation specific
+
+// TODO, utils, generalize to authprovider, choose default mesage, most of these funcs will move or be rewritten
+const safeSend = (provider, data) => {
+  const send = (Boolean(provider.sendAsync) ? provider.sendAsync : provider.send).bind(provider)
+  return new Promise((resolve, reject) => {
+    send(data, function(err, result) {
+      if (err) reject(err)
+      else if (result.error) reject(result.error)
+      else resolve(result.result)
+    })
+  })
+}
+
+const encodeRpcCall = (method, params, fromAddress) => ({
+  jsonrpc: '2.0',
+  id: 1,
+  method,
+  params,
+  fromAddress
+})
+
+const callRpc = async (provider, method, params, fromAddress) => safeSend(provider, encodeRpcCall(method, params, fromAddress))
+
+const providerAuth =  (fromAddress, ethereum) => {
+  const text = 'Add this account as a 3ID authentication method'
+  if (ethereum.isAuthereum) return ethereum.signMessageWithSigningKey(text)
+  var msg = '0x' + Buffer.from(text, 'utf8').toString('hex')
+  var params = [msg, fromAddress]
+  var method = 'personal_sign'
+  return callRpc(ethereum, method, params, fromAddress)
+}
+
+
 
 /**
  *  ThreeIdConnectService runs an identity wallet instance and rpc server with
@@ -44,16 +83,19 @@ class ThreeIdConnectService {
     * @param     {String}    params.type        Type of external auth request
     * @return    {Object}                       Response depends on type of request
   */
-  async externalAuth({ address, spaces, type }) {
+  async externalAuth({ address, spaces, type, migrate }) {
     let threeId
   	if (type === '3id_auth') {
-      // TODO IMPLEMENT full migration
+      if (!this.externalProvider) await this._connect(address)
+      const res = await providerAuth(address, this.externalProvider)
+      return '0x' + sha256(res.slice(2))
   	} else if (type === '3id_migration') {
-  		// if (!spaces) { // or will be flag
-      // TODO IMPELEMENT full migration
-  		// }
-      // throw new Error('FAILED')
-
+      if (migrate) {
+        const allSpaces = await API.listSpaces(address)
+        // TODO handle case that space not returned through api yet
+        // would imply new space, that doesnt need to migrate, but likely simplest
+        spaces = allSpaces
+      }
       threeId = await this._getThreeId(address)
       if (spaces.length > 0) {
         await threeId.authenticate(spaces)
