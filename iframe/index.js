@@ -4,13 +4,30 @@ import authProviders from './provider'
 const store = require('store')
 const assets = require('./html/3IDConnect/assets/assets.js')
 const style = require('style-loader!./style.scss')
+const selectedWallet = require('./html/3IDConnect/providerSelect.js').selectedWallet
 
 store.remove('error')
+
+const authProviderUIReducer = (providers) => {
+  return Object.keys(providers).reduce((acc, k) => {
+    acc[k] = {id: providers[k].id, name: providers[k].name, image: providers[k].image }
+    return acc
+  }, {})
+}
+
+const authMethods = authProviderUIReducer(authProviders)
+
+const getSelectedAuthMethod = (address) => {
+  const provider =  store.get(`provider_${address}`)
+  // fallback to when just id before, remove later
+  return typeof provider == 'object' ? provider : authMethods[provider]
+}
 
 /**
  *  UI Window Functions
  */
 window.isOpen = false;
+
 const handleOpenWalletOptions = (isOpen) => {
   if (window.isOpen) {
     document.getElementById("walletOptions").style.display = "none";
@@ -23,30 +40,10 @@ const handleOpenWalletOptions = (isOpen) => {
 }
 window.handleOpenWalletOptions = handleOpenWalletOptions;
 
-window.providerNameFunc = (provider, address, displayName) => {
-  selectedWallet.innerHTML = displayName
-  const imageToRender = authMethods.filter(obj => obj.name == displayName)[0].image
-  chosenWallet.innerHTML = !imageToRender || imageToRender == 'Default Wallet' ? assets.Wallet : assets[imageToRender];
-
-  store.set(`provider_${address}`, provider)
-  store.set(`providerName_${address}`, displayName)
-}
-
-// clean up state, esp id vs name, etc, just store auth ui data obj
-// TODO, assets should only be in template, same above
-window.getProviderDisplayImage = (address) => {
-  const name = store.get(`providerName_${address}`);
-  const imageToRender = authMethods.filter(obj => obj.name == name)[0].image
-  const image = !imageToRender || imageToRender == 'Default Wallet' ? assets.Wallet : assets[imageToRender];
-  return image;
-}
-
-window.getProviderDisplayName = (address) => {
-  return store.get(`providerName_${address}`)
-}
-
-window.getProvider = (address) => {
-  return store.get(`provider_${address}`)
+window.selectWallet = (provider, address) => {
+  const providerObj = authMethods[provider]
+  setWallet.innerHTML = selectedWallet(providerObj)
+  store.set(`provider_${address}`,  providerObj)
 }
 
 window.handleBrokenImage = (image) => {
@@ -79,27 +76,15 @@ const render = async (request) => {
 /**
  *  Identity Wallet Service configuration and start
  */
-
 const idwService = new ThreeIdConnectService()
-
-const getProviderData = (providers) => {
-  return Object.keys(providers).map(key => {
-    console.log(providers[key])
-    return {id: providers[key].id, name: providers[key].name, image: providers[key].image }
-  })
-}
-
-const authMethods = getProviderData(authProviders)
 
 
 // IDW getConsent function. Consume IDW request, renders request to user, and resolve selection
 const getConsent = async (req) => {
   await idwService.displayIframe()
-  // TODO can handle ui for injected providers better, but for now metamask and not metamask ui
-  // TODO remove now, we will detect inject and show specific based on web3modal
-  if (window.ethereum) req.injectedMetamask = window.ethereum.isMetaMask
 
-  req.authMethods = authMethods
+  req.authMethods = Object.entries(authMethods).map(val => val[1])
+  req.selectedAuthMethod = getSelectedAuthMethod(req.opts.address)
 
   await render(req)
 
@@ -137,7 +122,9 @@ const closing = (cb) => {
   closecallback = cb
 }
 
-idwService.start(authProviders, getConsent, errorCb, closing)
+const getAuthMethodId = (address) => getSelectedAuthMethod(address).id
+
+idwService.start(authProviders, getConsent, getAuthMethodId, errorCb, closing)
 
 // For testing, uncomment one line to see static view
 // render(JSON.parse(`{"type":"authenticate","origin":"localhost:30001","spaces":["metamask", "3Box", "thingspace"], "opts": { "address": "0x9acb0539f2ea0c258ac43620dd03ef01f676a69b"}}`))

@@ -3,7 +3,7 @@ import Portis from "@portis/web3";
 import Authereum from "authereum";
 import Fortmatic from "fortmatic";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-const ethUtils = require('./../../../js-3id-blockchain-utils/src/blockchains/ethereum')
+import ethUtils from './../../../js-3id-blockchain-utils/src/blockchains/ethereum' //TODO 
 
 const providerOptions = {
   portis: {

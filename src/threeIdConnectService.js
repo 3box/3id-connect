@@ -125,7 +125,6 @@ class ThreeIdConnectService {
     if (!rootKeys) spaces.push('undefined')
     spaces.forEach(space => {
       const key = consentKey(message.params.address, domain, space)
-      console.log(key)
       store.remove(key)
     })
   }
@@ -139,11 +138,10 @@ class ThreeIdConnectService {
     * @return    {ThreeId}
     */
   async _connect(address, domain) {
-    const providerName = store.get(`provider_${address}`) //TODO ref to move this to iframe implementation specific
-    if (!providerName) throw new Error('Must select provider')
-    this.authProvider = this.authProviders[providerName]
+    const providerId = this.getAuthMethodId(address)
+    if (!providerId) throw new Error('Must select provider')
+    this.authProvider = this.authProviders[providerId]
     await this.authProvider.connect()
-    console.log(this.authProvider.provider)
   }
 
   /**
@@ -154,10 +152,11 @@ class ThreeIdConnectService {
     * @param     {Function}    erroCB       Function to handle errors, function consumes error string (err) => {...}, called on errors
     * @param     {Function}    cancel       Function to cancel request, consumes callback, which is called when request is cancelled (cb) => {...}
     */
-  start(authProviders, getConsent, errorCb, cancel) {
+  start(authProviders, getConsent, getAuthMethodId, errorCb, cancel) {
     this.cancel = cancel
     this.authProviders = authProviders
     this.errorCb = errorCb
+    this.getAuthMethodId = getAuthMethodId
     this.idWallet = new IdentityWallet(getConsent, { externalAuth: this.externalAuth.bind(this) })
     this.provider = this.idWallet.get3idProvider()
     expose('send', this.providerRelay.bind(this), {postMessage: window.parent.postMessage.bind(window.parent)})
