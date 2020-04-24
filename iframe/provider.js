@@ -1,39 +1,17 @@
-import Web3Modal from "web3modal"
-import Portis from "@portis/web3";
-import Authereum from "authereum";
-import Fortmatic from "fortmatic";
-import WalletConnectProvider from "@walletconnect/web3-provider";
+const AuthProvider = require('./../src/authProviders/web3modal').default
 
-const providerOptions = {
-  portis: {
-    package: Portis,
-    options: {
-      id: "8f5cf962-ad62-4861-ab0c-7b234b6e6cff"
-    }
-  },
-  walletconnect: {
-    package: WalletConnectProvider,
-    options: {
-      infuraId: "e87f83fb85bf4aa09bdf6605ebe144b7"
-    }
-  },
-  fortmatic: {
-    package: Fortmatic,
-    options: {
-      key: "pk_live_EC842EEAC7F08995"
-    }
-  },
-  authereum: {
-    package: Authereum,
-    options: {}
-  }
-};
+const injected = new AuthProvider('injected')
+const fortmatic = new AuthProvider('fortmatic')
+const authereum = new AuthProvider('authereum')
+const walletconnect = new AuthProvider('walletconnect')
+const portis = new AuthProvider('portis')
 
-const web3Modal = new Web3Modal({
-  network: "mainnet",
-  cacheProvider: true,
-  providerOptions
-});
+const authProviders = {
+  injected,
+  fortmatic,
+  authereum,
+  walletconnect,
+  portis
+}
 
-
-export default web3Modal
+export default authProviders

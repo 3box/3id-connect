@@ -1,10 +1,7 @@
 import { expose, caller } from 'postmsg-rpc'
 import { fakeIpfs } from 'identity-wallet/lib/utils'
-const sha256 = require('js-sha256').sha256
-
 // const IdentityWallet = require('identity-wallet')
 const IdentityWallet = require('./../../identity-wallet-js/lib/identity-wallet')
-
 
 const ThreeId = require('3box/lib/3id/index')
 const API = require('3box/lib/api')
@@ -17,39 +14,6 @@ const serializedKey = (address) => `serialized3id_${address}`
 
 // TODO ui/iframe needs number of hooks, events may be a better interface
 // TODO could still refactor to make parts less visual/flow implementation specific
-
-// TODO, utils, generalize to authprovider, choose default mesage, most of these funcs will move or be rewritten
-const safeSend = (provider, data) => {
-  const send = (Boolean(provider.sendAsync) ? provider.sendAsync : provider.send).bind(provider)
-  return new Promise((resolve, reject) => {
-    send(data, function(err, result) {
-      if (err) reject(err)
-      else if (result.error) reject(result.error)
-      else resolve(result.result)
-    })
-  })
-}
-
-const encodeRpcCall = (method, params, fromAddress) => ({
-  jsonrpc: '2.0',
-  id: 1,
-  method,
-  params,
-  fromAddress
-})
-
-const callRpc = async (provider, method, params, fromAddress) => safeSend(provider, encodeRpcCall(method, params, fromAddress))
-
-const providerAuth =  (fromAddress, ethereum) => {
-  const text = 'Add this account as a 3ID authentication method'
-  if (ethereum.isAuthereum) return ethereum.signMessageWithSigningKey(text)
-  var msg = '0x' + Buffer.from(text, 'utf8').toString('hex')
-  var params = [msg, fromAddress]
-  var method = 'personal_sign'
-  return callRpc(ethereum, method, params, fromAddress)
-}
-
-
 
 /**
  *  ThreeIdConnectService runs an identity wallet instance and rpc server with
@@ -74,6 +38,7 @@ class ThreeIdConnectService {
     this.hide = caller('hide', {postMessage: window.parent.postMessage.bind(window.parent)})
   }
 
+  // TODO could probs make externalAuth and auth provider as well, except this one wraps many
   /**
     *  External Authencation method for IDW
     *
@@ -86,9 +51,8 @@ class ThreeIdConnectService {
   async externalAuth({ address, spaces, type, migrate }) {
     let threeId
   	if (type === '3id_auth') {
-      if (!this.externalProvider) await this._connect(address)
-      const res = await providerAuth(address, this.externalProvider)
-      return '0x' + sha256(res.slice(2))
+      if (!this.authProvider) await this._connect(address)
+      return this.authProvider.authenticate('message', address)
   	} else if (type === '3id_migration') {
       if (migrate) {
         const allSpaces = await API.listSpaces(address)
@@ -102,10 +66,11 @@ class ThreeIdConnectService {
       }
       return threeId.serializeState()
   	} else if (type === '3id_createLink' ) {
+      // TODO not needed after, only new accounts before migration
       // TODO could use disply hook for a link request specific card, will show consent screen again right now
       this.displayIframe()
       try {
-        await this.idWallet.linkAddress(address, this.externalProvider)
+        await this.idWallet.linkAddress(address, this.authProvider.provider)
       } catch(e) {
         console.log(e)
       }
@@ -122,9 +87,9 @@ class ThreeIdConnectService {
     * @return    {ThreeId}
     */
   async _getThreeId (address) {
-    if (!this.externalProvider) await this._connect(address)
+    if (!this.authProvider) await this._connect(address)
     if(!this._threeId) {
-      this._threeId = await ThreeId.getIdFromEthAddress(address, this.externalProvider, fakeIpfs, undefined, {})
+      this._threeId = await ThreeId.getIdFromEthAddress(address, this.authProvider.provider, fakeIpfs, undefined, {})
     }
     return this._threeId
   }
@@ -176,21 +141,22 @@ class ThreeIdConnectService {
   async _connect(address, domain) {
     const providerName = store.get(`provider_${address}`) //TODO ref to move this to iframe implementation specific
     if (!providerName) throw new Error('Must select provider')
-    this.externalProvider = await this.web3Modal.connectTo(providerName)
+    this.authProvider = this.authProviders[providerName]
+    await this.authProvider.connect()
+    console.log(this.authProvider.provider)
   }
 
-  // TODO could consume web3modal or a provider already
   /**
     *  Start identity wallet service. Once returns ready to receive rpc requests
     *
-    * @param     {Web3Modal}   web3Modal    configured instance of web3modal
+    * @param     {Array<AuthProvider>}   authProviders    an array of auth providers
     * @param     {Function}    getConsent   get consent function, reference IDW
     * @param     {Function}    erroCB       Function to handle errors, function consumes error string (err) => {...}, called on errors
     * @param     {Function}    cancel       Function to cancel request, consumes callback, which is called when request is cancelled (cb) => {...}
     */
-  start(web3Modal, getConsent, errorCb, cancel) {
+  start(authProviders, getConsent, errorCb, cancel) {
     this.cancel = cancel
-    this.web3Modal = web3Modal
+    this.authProviders = authProviders
     this.errorCb = errorCb
     this.idWallet = new IdentityWallet(getConsent, { externalAuth: this.externalAuth.bind(this) })
     this.provider = this.idWallet.get3idProvider()
