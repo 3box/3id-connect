@@ -11,7 +11,7 @@ const store = require('store')
 
 const consentKey = (address, domain, space) => `3id_consent_${address}_${domain}_${space}`
 const serializedKey = (address) => `serialized3id_${address}`
-
+const authResKey = (address) => `authRes_${address}`
 // TODO ui/iframe needs number of hooks, events may be a better interface
 // TODO could still refactor to make parts less visual/flow implementation specific
 
@@ -52,7 +52,11 @@ class ThreeIdConnectService {
     let threeId
   	if (type === '3id_auth') {
       if (!this.authProvider) await this._connect(address)
-      return this.authProvider.authenticate('message', address)
+      const cachedAuthRes = store.get(authResKey(address))
+      if (cachedAuthRes) return cachedAuthRes
+      const res = await this.authProvider.authenticate('message', address) //TODO message will probs come from IDW in req
+      store.set(authResKey(address))
+      return res
   	} else if (type === '3id_migration') {
       if (migrate) {
         const allSpaces = await API.listSpaces(address)
