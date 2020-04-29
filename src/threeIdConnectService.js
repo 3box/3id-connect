@@ -55,7 +55,7 @@ class ThreeIdConnectService {
       const cachedAuthRes = store.get(authResKey(address))
       if (cachedAuthRes) return cachedAuthRes
       const res = await this.authProvider.authenticate('message', address) //TODO message will probs come from IDW in req
-      store.set(authResKey(address))
+      store.set(authResKey(address), res)
       return res
   	} else if (type === '3id_migration') {
       if (migrate) {

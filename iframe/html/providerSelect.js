@@ -1,5 +1,5 @@
-const style = require('style-loader!../../style.scss')
-const assets = require('./assets/assets.js')
+const style = require('style-loader!../css/style.scss')
+const assets = require('./../assets/assets.js')
 
 const providerSelect = (data, isMobile) => `
   <div class='${style.actions}'>

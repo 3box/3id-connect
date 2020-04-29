@@ -1,10 +1,10 @@
-import requestCard from './html/3IDConnect/requestCard.js'
+import requestCard from './html/requestCard.js'
 import ThreeIdConnectService from './../src/threeIdConnectService.js'
-import authProviders from './provider'
+import authProviders from './authProviders'
 const store = require('store')
-const assets = require('./html/3IDConnect/assets/assets.js')
-const style = require('style-loader!./style.scss')
-const selectedWallet = require('./html/3IDConnect/providerSelect.js').selectedWallet
+const assets = require('./assets/assets.js')
+const style = require('style-loader!./css/style.scss')
+const selectedWallet = require('./html/providerSelect.js').selectedWallet
 
 store.remove('error')
 

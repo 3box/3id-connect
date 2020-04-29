@@ -16,6 +16,18 @@ Right now you authenticate and link ethereum accounts to mange your 3ID, in the 
 * **/iframe** - all html, css, js, design assets for iframe and flow
 * **/public** - build assets deployed for iframe
 
+## <a name="authProvider"></a> Adding an AuthProvider 
+
+You can add support for other authentication methods, providers, blockchains, etc in 3ID-Connect by implementing your own AuthProvider. This will create the bridge to control a 3ID with any other existing account model. You can take the following steps to implement your own AuthProvider and add support for it in 3ID-Connect.
+
+1). Make sure there is support for account links in [js-3id-blockchain-utils](https://github.com/ceramicnetwork/js-3id-blockchain-utils) for your blockchain. There also may be a `authenticate` function for your blockchain that is implemented based on what ever your standard account signing interface is. You can use both `authenticate` and `createLink` in the next step.
+
+2) Implement a AuthProvider by extending the AbstractAuthProvider class. Most of the details can be found in the comments for the [AbstractAuthProvider](https://github.com/3box/3id-connect/tree/develop/src/authProviders/abstractAuthProvider.js). Implement this in your own file and add it in `src/authProviders`.
+
+3) Add your AuthProvider logo/image as file in the `iframe/assets/`. SVGs are recommended. In `iframe/assets/assets.js` import your file and export by a name. Your AuthProvider image property string should match the name you export here. Lastly in `iframe/authProviders.js` import your AuthProvider, create and instance, and add to the authProvider object (the key in this object should match your AuthProvider id).
+
+4) Create a branch named `feat/youAuthProviderId`, and open a PR for review.
+
 ## <a name="development"></a> Development
 
 Clone and install dependencies

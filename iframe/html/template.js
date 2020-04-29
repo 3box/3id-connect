@@ -1,5 +1,5 @@
-const style = require('style-loader!../../style.scss')
-const assets = require('./assets/assets.js')
+const style = require('style-loader!../css/style.scss')
+const assets = require('./../assets/assets.js')
 
 const capitalizeFirst = string => string.charAt(0).toUpperCase() + string.slice(1)
 const spaceString = (spaces) => spaces.join(', ')
@@ -7,7 +7,7 @@ const spaceString = (spaces) => spaces.join(', ')
 const template = (data, content, isMobile) => `
   <div class='${style.card} ${isMobile ? style.cardMobile : ''}'>
     <div class=${style.controls}>
-      <a 
+      <a
       href="https://3box.io"
       rel="noopener noreferrer"
       target="_blank"
@@ -24,9 +24,9 @@ const template = (data, content, isMobile) => `
 
     <div class='${style.content} ${isMobile ? style.contentMobile : ''}' id='content' >
       <div class='${style.header}'>
-        <img 
-          src='${`https://${data.request.origin}/favicon.ico`}' 
-          class='${style.headerLogo}' 
+        <img
+          src='${`https://${data.request.origin}/favicon.ico`}'
+          class='${style.headerLogo}'
           onError='handleBrokenImage(this)'
           id='siteFavicon'
         />

@@ -18,7 +18,6 @@ import AuthereumLogo from "web3modal/src/providers/logos/authereum.svg";
 
 // TODO create assets dir and files, but export all from here
 
-
 const Loading = `<svg class="lds-spin" width="90px"  height="90px"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" style="background: none;"><g transform="translate(80,50)">
 <g transform="rotate(0)">
 <circle cx="0" cy="0" r="10" fill="#ffffff" fill-opacity="1" transform="scale(1.09585 1.09585)">

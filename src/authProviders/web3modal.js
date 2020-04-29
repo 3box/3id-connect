@@ -3,7 +3,8 @@ import Portis from "@portis/web3";
 import Authereum from "authereum";
 import Fortmatic from "fortmatic";
 import WalletConnectProvider from "@walletconnect/web3-provider";
-import ethUtils from './../../../js-3id-blockchain-utils/src/blockchains/ethereum' //TODO 
+import ethUtils from './../../../js-3id-blockchain-utils/src/blockchains/ethereum' //TODO
+import AbstractAuthProvider from './abstractAuthProvider'
 
 const providerOptions = {
   portis: {
@@ -62,8 +63,9 @@ const nameToLogo = {
 /**
  *  AuthProvider which can be used for all providers supported in web3modal
  */
-class AuthProvider {
+class AuthProvider extends AbstractAuthProvider {
   constructor(providerId) {
+    super()
     this.network = 'ethereum'
 
     if (providerId == 'injected') {
