@@ -5,6 +5,7 @@ const IdentityWallet = require('./../../identity-wallet-js/lib/identity-wallet')
 
 const ThreeId = require('3box/lib/3id/index')
 const API = require('3box/lib/api')
+const utils = require('3box/lib/utils')
 import { createLink } from '3id-blockchain-utils'
 const Url = require('url-parse')
 const store = require('store')
@@ -12,6 +13,7 @@ const store = require('store')
 const consentKey = (address, domain, space) => `3id_consent_${address}_${domain}_${space}`
 const serializedKey = (address) => `serialized3id_${address}`
 const authResKey = (address) => `authRes_${address}`
+const ADDRESS_SERVER_URL = 'https://beta.3box.io/address-server'
 // TODO ui/iframe needs number of hooks, events may be a better interface
 // TODO could still refactor to make parts less visual/flow implementation specific
 
@@ -38,6 +40,18 @@ class ThreeIdConnectService {
     this.hide = caller('hide', {postMessage: window.parent.postMessage.bind(window.parent)})
   }
 
+  async _getLinkedData (ethereumAddress) {
+    try {
+      const { rootStoreAddress, did } = (await utils.fetchJson(`${ADDRESS_SERVER_URL}/odbAddress/${ethereumAddress}`)).data
+      return { rootStoreAddress, did }
+    } catch (err) {
+      if (err.statusCode === 404) {
+        return {}
+      }
+      throw new Error('Error while getting rootstore', err)
+    }
+  }
+
   // TODO could probs make externalAuth and auth provider as well, except this one wraps many
   /**
     *  External Authencation method for IDW
@@ -48,7 +62,7 @@ class ThreeIdConnectService {
     * @param     {String}    params.type        Type of external auth request
     * @return    {Object}                       Response depends on type of request
   */
-  async externalAuth({ address, spaces, type, migrate }) {
+  async externalAuth({ address, spaces, type, did }) {
     let threeId
   	if (type === '3id_auth') {
       if (!this.authProvider) await this._connect(address)
@@ -58,6 +72,8 @@ class ThreeIdConnectService {
       store.set(authResKey(address), res)
       return res
   	} else if (type === '3id_migration') {
+      const { did } = await this._getLinkedData(address)
+      if (!did) return null
       if (migrate) {
         const allSpaces = await API.listSpaces(address)
         // TODO handle case that space not returned through api yet
@@ -70,15 +86,18 @@ class ThreeIdConnectService {
       }
       return threeId.serializeState()
   	} else if (type === '3id_createLink' ) {
-      // TODO not needed after, only new accounts before migration
-      // TODO could use disply hook for a link request specific card, will show consent screen again right now
       this.displayIframe()
+      let proof
       try {
-        await this.idWallet.linkAddress(address, this.authProvider.provider)
+        const linked = await this._getLinkedData(address)
+        if (!linked.did) {
+          proof = await this.authProvider.createLink(did, address)
+        }
       } catch(e) {
         console.log(e)
       }
       this.hideIframe()
+      return proof
     }
   }
 
