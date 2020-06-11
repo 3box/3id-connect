@@ -2,6 +2,7 @@ import ThreeIdProviderProxy from './threeIdProviderProxy.js'
 import { expose } from 'postmsg-rpc'
 import EthereumAuthProvider from './authProvider/ethereumAuthProvider.js'
 import { fakeIpfs } from 'identity-wallet/lib/utils'
+import ThreeId from './legacy/3id.js'
 
 const IDENTITY_WALLET_IFRAME_URL = 'https://connect.3box.io'
 
@@ -46,11 +47,9 @@ class ThreeIdConnect {
   }
 
   // Just passing ref to threeId and ipfs during migration
-  async connect (provider, ThreeId, ipfs) {
+  async connect (provider) {
     // assumes eth provider during migration
     this.provider = provider
-    this.ThreeId = ThreeId
-    this.ipfs = ipfs
     // after migration, can detect different provdier to create authProvider
     this.authProvider = new EthereumAuthProvider(provider)
   }
@@ -85,7 +84,7 @@ class ThreeIdConnect {
     */
   async _getThreeId (address) {
     if(!this._threeId) {
-      this._threeId = await this.ThreeId.getIdFromEthAddress(address, this.provider, this.ipfs, undefined, {})
+      this._threeId = await ThreeId.getIdFromEthAddress(address, this.provider)
     }
     return this._threeId
   }
