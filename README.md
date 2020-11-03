@@ -5,9 +5,15 @@
 
 ![3ID Connect Image](./assets/3id-connect_readme-image.png)
 
+[Find 3ID-Connect on Ceramic here.](https://github.com/ceramicstudio/3id-connect)
+
 3ID-Connect is a 3ID account management service run in an iframe. It allows you to authenicate, manage, and permission your 3ID keys to applications. Used by default in [3box-js](https://github.com/3box/3box-js). [identity-wallet-js](https://github.com/3box/identity-wallet-js) handles most operations and the parent window (application) communicates with iframe service over RPC layer as defined by [3ID JSON-RPC](https://github.com/3box/3box/blob/master/3IPs/3ip-10.md)
 
 Right now you authenticate and link ethereum accounts to mange your 3ID, in the future other keypairs, blockchain accounts, and authentication methods can be added.
+
+# <a name="intro-ceramic"></a> 3ID-Connect Ceramic
+
+The next verion of 3ID-Connect is being developed on [Ceramic](https://ceramic.network) and [identity-wallet-js V2](https://github.com/3box/identity-wallet-js). It is being developed in parallel with the current version. You can find 3ID-Connect with Ceramic support in the [following repo](https://github.com/ceramicstudio/3id-connect). In the future this repo will be depracated. It is released at 3id-connect@next and available at 3idconnect.org.
 
 ## <a name="structure"></a> Structure
 
@@ -35,10 +41,6 @@ $ npm run start
 ```
 $ npm run build
 ```
-
-# <a name="intro-ceramic"></a> 3ID-Connect Ceramic
-
-The next verion of 3ID-Connect is being developed on [Ceramic](https://ceramic.network) and [identity-wallet-js V2](https://github.com/3box/identity-wallet-js). It is being developed in parallel with the current version. You can find 3ID-Connect with Ceramic support on the following branches `ceramic-develop` and `ceramic-master`. It is released at 3id-connect@next and available at 3idconnect.org.
 
 ## Maintainers
 [@zachferland](https://github.com/zachferland)
