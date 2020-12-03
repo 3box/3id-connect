@@ -34,17 +34,17 @@ const didProvider = await threeIdConnect.getDidProvider()
 
 # <a name="intro-ceramic"></a> 3ID-Connect Ceramic
 
-The next verion of 3ID-Connect is being developed on [Ceramic](https://ceramic.network) and [identity-wallet-js V2](https://github.com/3box/identity-wallet-js). It is being developed in parallel with the current version. You can find 3ID-Connect with Ceramic support in the [following repo](https://github.com/ceramicstudio/3id-connect). In the future this repo will be depracated. It is released at 3id-connect@next and available at 3idconnect.org.
+The next verion of 3ID-Connect is being developed on [Ceramic](https://ceramic.network) and [ThreeIdProvider](https://github.com/ceramicstudio/js-3id-did-provider). It is being developed in parallel with the current version. You can find 3ID-Connect with Ceramic support in the [following repo](https://github.com/ceramicstudio/3id-connect). In the future this repo will be depracated. It is released at 3id-connect@next and available at 3idconnect.org.
 
 ## <a name="structure"></a> Structure
 
 - **/src** - Core logic and consumable interfaces for clients and iframe
-  - **/threeIdConnect.js** - Application interface (RPC client) to load iframe and return 3ID provider.
-  - **/connectService.js** - Identity wallet instance and RPC 'server' to handle requests
-  - **/didProviderProxy.js** - DID provider interface that relays request through RPC layer
+  - **/threeIdConnect.ts** - Application interface (RPC client) to load iframe and return 3ID provider.
+  - **/connectService.ts** - Identity wallet instance and RPC 'server' to handle requests
+  - **/didProviderProxy.ts** - DID provider interface that relays request through RPC layer
   - **/authProvider** - 3ID connect (client) consumes an auth provider, auth providers can be implemented to support many different blockchain accounts and authentication methods
-    - **/abstractAuthProvider.js** - Interface used to implement a auth provider
-    - **/ethereumAuthProvider.js** - Etheruum auth provider, to link and authenticate with ethereum accounts
+    - **/abstractAuthProvider.ts** - Interface used to implement a auth provider
+    - **/ethereumAuthProvider.ts** - Ethereum auth provider, to link and authenticate with ethereum accounts
 - **/iframe** - all html, css, js, design assets for iframe and flow
 - **/public** - build assets deployed for iframe
 
