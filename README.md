@@ -2,8 +2,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/3boxdb.svg?style=for-the-badge&label=Twitter)](https://twitter.com/3boxdb)
 
 # <a name="intro"></a> 3ID-Connect
-> ⚠️ This package is slowly being phased out in favor of a new more decentralized system called IDX (https://idx.xyz) which is built on top of the Ceramic network. You can use it for now, but be aware that support will be limited as Ceramic is moving closer to a mainnet release.
-
+> ⚠️ This package has been moved to https://github.com/ceramicstudio/3id-connect
 
 
 
