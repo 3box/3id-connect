@@ -1,0 +1,26 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 10
+  target-branch: develop
+  reviewers:
+  - zachferland
+  assignees:
+  - zachferland
+  allow:
+  - dependency-type: production
+  ignore:
+  - dependency-name: "@babel/runtime"
+    versions:
+    - 7.12.13
+    - 7.12.18
+    - 7.12.5
+    - 7.13.10
+    - 7.13.8
+    - 7.13.9
+  - dependency-name: identity-wallet
+    versions:
+    - 1.4.1
