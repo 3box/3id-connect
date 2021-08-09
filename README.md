@@ -1,5 +1,6 @@
-# ⚠️ ⚠️ This project is no longer supported ⚠️ ⚠️ 
+# ⚠️ ⚠️ Deprecated in favor of Ceramic ⚠️ ⚠️ 
 > 3box.js and related tools built by 3Box Labs are deprecated and no loger supported. Developers are encurraged to build with https://ceramic.network which is a more secure and decentralized protocol for sovereign data.
+
 
 # <a name="intro"></a> 3ID-Connect
 > ⚠️ This package has been moved to https://github.com/ceramicstudio/3id-connect
